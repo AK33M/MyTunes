@@ -26,5 +26,10 @@ namespace MyTunes.UWP
         {
             this.InitializeComponent();
         }
+
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
+            DataContext = await SongLoader.Load();
+        }
     }
 }

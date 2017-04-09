@@ -7,28 +7,31 @@ using System.Reflection;
 
 namespace MyTunes
 {
-	public static class SongLoader
-	{
-		const string Filename = "songs.json";
+    public static class SongLoader
+    {
+        const string Filename = "songs.json";
 
-		public static async Task<IEnumerable<Song>> Load()
-		{
-			using (var reader = new StreamReader(OpenData()))
-			{
-				return JsonConvert.DeserializeObject<List<Song>>(await reader.ReadToEndAsync());
-			}
-		}
+        public static async Task<IEnumerable<Song>> Load()
+        {
+            using (var reader = new StreamReader(await OpenData()))
+            {
+                return JsonConvert.DeserializeObject<List<Song>>(await reader.ReadToEndAsync());
+            }
+        }
 
-		private static Stream OpenData()
-		{
+        private async static Task<Stream> OpenData()
+        {
 #if __IOS__
 			return File.OpenRead(Filename);
-#endif
-#if __ANDROID__
+#elif __ANDROID__
 			return Android.App.Application.Context.Assets.Open(Filename);
+#elif WINDOWS_UWP
+            var sf = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync(Filename);
+            return await sf.OpenStreamForReadAsync();
+#else
+            return null;
 #endif
-
-		}
-	}
+        }
+    }
 }
 
